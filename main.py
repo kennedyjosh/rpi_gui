@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 import img_dr
@@ -12,8 +12,10 @@ MILLISEC = 1000
 PhotoChangeInterval = 30
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, app):
         super(MainWindow, self).__init__()
+
+        self.app = app
 
         self.imgs = os.listdir(os.path.join(os.getcwd(), "img"))
 
@@ -24,9 +26,10 @@ class MainWindow(QMainWindow):
         self.lbl_img = QLabel(self)
         self.lbl_img.move(0,0)
 
-    def run(self, app):
-        screenRes = app.primaryScreen().size()
+    def run(self):
+        screenRes = self.app.primaryScreen().size()
         self.setGeometry(0, 0, screenRes.width(), screenRes.height())
+        self.setStyleSheet("background-color: black;")
         self.setWindowTitle("RPI GUI")
 
         self.lbl_img.resize(screenRes.width(), screenRes.height())
@@ -35,7 +38,6 @@ class MainWindow(QMainWindow):
         self.timer.start()
 
         self.showFullScreen()
-        sys.exit(app.exec_())
 
     def change_img(self):
         img_path = os.path.join("img", random.choice(self.imgs))
@@ -43,14 +45,18 @@ class MainWindow(QMainWindow):
         self.lbl_img.show()
         self.timer.start()
 
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key_Escape:
+            self.app.quit()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     screenRes = app.primaryScreen().size()
-    win = MainWindow()
+    win = MainWindow(app)
     for img in win.imgs:
         img = os.path.join(os.getcwd(), "img", img)
         img_dr.convert_to_srgb(img)    # avoids a warning
         img_dr.stretch_to_fill(img, screenRes.width(), screenRes.height())
+    win.run()
+    sys.exit(app.exec_())
 
-    win.run(app)

@@ -11,6 +11,9 @@ MILLISEC = 1000
 
 # number of seconds a photo is on screen before changing
 PhotoChangeInterval = 30
+# font size of time displayed
+ClockFontSize = 102
+Font = "avenir"
 
 class MainWindow(QMainWindow):
     def __init__(self, app):
@@ -19,6 +22,7 @@ class MainWindow(QMainWindow):
         self.app = app
 
         self.imgs = os.listdir(os.path.join(os.getcwd(), "img"))
+        self.img_index = -1
 
         self.timer = QTimer()
         self.timer.setInterval(PhotoChangeInterval * MILLISEC)
@@ -34,13 +38,13 @@ class MainWindow(QMainWindow):
         self.lbl_clock = QLabel(self)
         # w >> 1 == w / 2 (or close enough)
         self.lbl_clock.setStyleSheet("color : white;"
-                                     "font-family : avenir;"
-                                     "font : 102px;"
+                                     "font-family : {};"
+                                     "font : {}px;"
                                      "border-top-left-radius : 20px;"
                                      "border-top-right-radius : 20px;"
                                      "border-bottom-left-radius : 20px;"
                                      "border-bottom-right-radius : 20px;"
-                                     "background-color : rgba(0,0,0,100);") # gray semi-transparent
+                                     "background-color : rgba(0,0,0,100);".format(Font, ClockFontSize))
         self.lbl_clock.setAlignment(Qt.AlignHCenter)
 
 
@@ -61,7 +65,11 @@ class MainWindow(QMainWindow):
         self.showFullScreen()
 
     def change_img(self):
-        img_path = os.path.join("img", random.choice(self.imgs))
+        self.img_index += 1
+        self.img_index %= len(self.imgs)
+        if self.img_index == 0:
+            random.shuffle(self.imgs)
+        img_path = os.path.join("img", self.imgs[self.img_index])
         self.lbl_img.setPixmap(QPixmap(img_path))
         self.lbl_img.show()
         self.timer.start()
@@ -78,9 +86,9 @@ class MainWindow(QMainWindow):
         # the background looked too tight horizontally,
         # this cmd increases the horizontal size by 3% and re-centers
         self.lbl_clock.setGeometry(QRect(
-            int(self.lbl_clock.x() - (self.lbl_clock.size().width() * .03)),
+            int(self.lbl_clock.x() - (self.lbl_clock.size().width() * .04)),
             self.lbl_clock.y(),
-            int(self.lbl_clock.size().width() * 1.03),
+            int(self.lbl_clock.size().width() * 1.04),
             self.lbl_clock.size().height()
         ))
         self.clock_refresh.start()

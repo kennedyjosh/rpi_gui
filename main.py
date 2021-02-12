@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setOverrideCursor(Qt.BlankCursor)
     screenRes = app.primaryScreen().size()
     win = MainWindow(app)
     for img in win.imgs:

@@ -104,6 +104,10 @@ class MainWindow(QMainWindow):
             self.app.quit()
 
 if __name__ == "__main__":
+    # create .img folder for caching fixed imgs if it doesnt already exist
+    if not os.path.exists(FIXED_IMG_FOLDER):
+        os.makedirs(FIXED_IMG_FOLDER)
+
     app = QApplication(sys.argv)
     app.setOverrideCursor(Qt.BlankCursor)
     screenRes = app.primaryScreen().size()

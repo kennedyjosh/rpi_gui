@@ -21,10 +21,20 @@ def convert_to_srgb(file_path):
 # stretches an image to fill a certain w,h requirement
 def stretch_to_fill(img_path, w, h):
     img = Image.open(img_path)
-    ## NOTE: assumes all images have w > h
-    if img.size[0] < w or img.size[0] > (w * 1.25):
+    # using this algorithim: https://stackoverflow.com/a/6565988/11106258
+    ratio_img = img.size[0] / img.size[1]
+    ratio_screen = w / h
+    if ratio_screen > ratio_img:
+        img = img.resize((int(img.size[0] * h / img.size[1]), h), Image.ANTIALIAS)
+    else:
+        img = img.resize((w, int(img.size[1] * w / img.size[0])), Image.ANTIALIAS)
+    img.save(img_path)
+    # one last check
+    img = Image.open(img_path)
+    if img.size[0] < w:
         resize_to_width(img_path, w)
-    elif img.size[1] < h or img.size[1] > (h * 1.25):
+    img = Image.open(img_path)
+    if img.size[1] < h:
         resize_to_height(img_path, h)
 
 # source: https://stackoverflow.com/a/451580/11106258

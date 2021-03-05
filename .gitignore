@@ -1,6 +1,7 @@
-/venv/
+venv/
 *.DS_Store
 *.pyc
 *~
 *.idea
 .img
+__pycache__/

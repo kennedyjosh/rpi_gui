@@ -5,15 +5,21 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 import img_dr
 import os
 import random
+import shutil
 import sys
 
-MILLISEC = 1000
-
+'''CONFIGURABLE'''
 # number of seconds a photo is on screen before changing
 PhotoChangeInterval = 30
 # font size of time displayed
 ClockFontSize = 84
 Font = "pibotolt"
+
+'''CONSTANTS'''
+MILLISEC = 1000
+RAW_IMG_FOLDER = os.path.join(os.getcwd(), "img")
+FIXED_IMG_FOLDER = os.path.join(os.getcwd(), ".img")
+
 
 class MainWindow(QMainWindow):
     def __init__(self, app):
@@ -21,7 +27,7 @@ class MainWindow(QMainWindow):
 
         self.app = app
 
-        self.imgs = os.listdir(os.path.join(os.getcwd(), "img"))
+        self.imgs = os.listdir(FIXED_IMG_FOLDER)
         self.img_index = -1
 
         self.timer = QTimer()
@@ -69,7 +75,7 @@ class MainWindow(QMainWindow):
         self.img_index %= len(self.imgs)
         if self.img_index == 0:
             random.shuffle(self.imgs)
-        img_path = os.path.join("img", self.imgs[self.img_index])
+        img_path = os.path.join(FIXED_IMG_FOLDER, self.imgs[self.img_index])
         self.lbl_img.setPixmap(QPixmap(img_path))
         self.lbl_img.show()
         self.timer.start()
@@ -102,10 +108,20 @@ if __name__ == "__main__":
     app.setOverrideCursor(Qt.BlankCursor)
     screenRes = app.primaryScreen().size()
     win = MainWindow(app)
+    raw_imgs = os.listdir(RAW_IMG_FOLDER)
+    for img in raw_imgs:
+        # only process new images
+        if img not in win.imgs:
+            win.imgs.append(img)
+            shutil.copy(os.path.join(RAW_IMG_FOLDER, img), FIXED_IMG_FOLDER) # copy to .img folder
+            img = os.path.join(FIXED_IMG_FOLDER, img)
+            img_dr.convert_to_srgb(img)    # avoids a warning
+            img_dr.stretch_to_fill(img, screenRes.width(), screenRes.height())
+    # remove imgs in .img that were removed from img
     for img in win.imgs:
-        img = os.path.join(os.getcwd(), "img", img)
-        img_dr.convert_to_srgb(img)    # avoids a warning
-        img_dr.stretch_to_fill(img, screenRes.width(), screenRes.height())
+        if img not in os.listdir(RAW_IMG_FOLDER):
+            os.remove(os.path.join(FIXED_IMG_FOLDER, img))
+            win.imgs.remove(img)
     win.run()
     sys.exit(app.exec_())
 

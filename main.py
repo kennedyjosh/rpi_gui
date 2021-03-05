@@ -12,8 +12,8 @@ MILLISEC = 1000
 # number of seconds a photo is on screen before changing
 PhotoChangeInterval = 30
 # font size of time displayed
-ClockFontSize = 102
-Font = "avenir"
+ClockFontSize = 84
+Font = "pibotolt"
 
 class MainWindow(QMainWindow):
     def __init__(self, app):

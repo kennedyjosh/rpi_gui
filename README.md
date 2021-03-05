@@ -25,14 +25,13 @@ docker run --rm \
   -v /etc/localtime:/etc/localtime:ro \
   -e DISPLAY=:0 \
   -u qtuser \
-  -w /app \
   IMAGE \
   python3 /app/main.py
 ```
 
 You may see some messages print afterwards; you can ignore these as long as the program is working. You will know it is working if an image appears on the display with the current time. You can close the command window (or terminate the ssh session) and the program will continue to run. 
 
-To stop the program, you will have to find and terminate the processes manually. On Raspbian, this can be done by finding the process IDs using `ps -aux | grep python`. You will then have to kill 2 processes, the one for the Docker command and the one that says something like `python3 /app/main.py`. However, if you have a keyboard plugged in to your Pi, you can hit the Escape button to end the program.
+To stop the program, you will have to find and terminate the processes manually. On Raspbian, this can be done by finding the process IDs using `ps -aux | grep python`. You will then have to kill 2 processes, the one for the Docker command and the one that says something like `python3 /app/main.py`.
 
 #### Without Docker
 

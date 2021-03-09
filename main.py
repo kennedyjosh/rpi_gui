@@ -2,24 +2,13 @@ from datetime import datetime
 from PyQt5.QtCore import Qt, QRect, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+import CONFIG as config
+import constant
 import img_dr
 import os
 import random
 import shutil
 import sys
-
-'''CONFIGURABLE'''
-# number of seconds a photo is on screen before changing
-PhotoChangeInterval = 30
-# font size of time displayed
-ClockFontSize = 84
-Font = "pibotolt"
-
-'''CONSTANTS'''
-MILLISEC = 1000
-RAW_IMG_FOLDER = os.path.join(os.getcwd(), "img")
-FIXED_IMG_FOLDER = os.path.join(os.getcwd(), ".img")
-
 
 class MainWindow(QMainWindow):
     def __init__(self, app):
@@ -27,15 +16,15 @@ class MainWindow(QMainWindow):
 
         self.app = app
 
-        self.imgs = os.listdir(FIXED_IMG_FOLDER)
+        self.imgs = os.listdir(constant.FIXED_IMG_FOLDER)
         self.img_index = -1
 
         self.timer = QTimer()
-        self.timer.setInterval(PhotoChangeInterval * MILLISEC)
+        self.timer.setInterval(config.PhotoChangeInterval * constant.MILLISEC)
         self.timer.timeout.connect(self.change_img)
 
         self.clock_refresh = QTimer()
-        self.clock_refresh.setInterval(MILLISEC)
+        self.clock_refresh.setInterval(constant.MILLISEC)
         self.clock_refresh.timeout.connect(self.update_clock)
 
         self.lbl_img = QLabel(self)
@@ -43,14 +32,7 @@ class MainWindow(QMainWindow):
 
         self.lbl_clock = QLabel(self)
         # w >> 1 == w / 2 (or close enough)
-        self.lbl_clock.setStyleSheet("color : white;"
-                                     "font-family : {};"
-                                     "font : {}px;"
-                                     "border-top-left-radius : 20px;"
-                                     "border-top-right-radius : 20px;"
-                                     "border-bottom-left-radius : 20px;"
-                                     "border-bottom-right-radius : 20px;"
-                                     "background-color : rgba(0,0,0,100);".format(Font, ClockFontSize))
+        self.lbl_clock.setStyleSheet(constant.SS_FONT + constant.SS_BBOX)
         self.lbl_clock.setAlignment(Qt.AlignHCenter)
 
 
@@ -75,7 +57,7 @@ class MainWindow(QMainWindow):
         self.img_index %= len(self.imgs)
         if self.img_index == 0:
             random.shuffle(self.imgs)
-        img_path = os.path.join(FIXED_IMG_FOLDER, self.imgs[self.img_index])
+        img_path = os.path.join(constant.FIXED_IMG_FOLDER, self.imgs[self.img_index])
         self.lbl_img.setPixmap(QPixmap(img_path))
         self.lbl_img.show()
         self.timer.start()
@@ -105,26 +87,26 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     # create .img folder for caching fixed imgs if it doesnt already exist
-    if not os.path.exists(FIXED_IMG_FOLDER):
-        os.makedirs(FIXED_IMG_FOLDER)
+    if not os.path.exists(constant.FIXED_IMG_FOLDER):
+        os.makedirs(constant.FIXED_IMG_FOLDER)
 
     app = QApplication(sys.argv)
     app.setOverrideCursor(Qt.BlankCursor)
     screenRes = app.primaryScreen().size()
     win = MainWindow(app)
-    raw_imgs = os.listdir(RAW_IMG_FOLDER)
+    raw_imgs = os.listdir(constant.RAW_IMG_FOLDER)
     for img in raw_imgs:
         # only process new images
         if img not in win.imgs:
             win.imgs.append(img)
-            shutil.copy(os.path.join(RAW_IMG_FOLDER, img), FIXED_IMG_FOLDER) # copy to .img folder
-            img = os.path.join(FIXED_IMG_FOLDER, img)
+            shutil.copy(os.path.join(constant.RAW_IMG_FOLDER, img), constant.FIXED_IMG_FOLDER) # copy to .img folder
+            img = os.path.join(constant.FIXED_IMG_FOLDER, img)
             img_dr.convert_to_srgb(img)    # avoids a warning
             img_dr.stretch_to_fill(img, screenRes.width(), screenRes.height())
     # remove imgs in .img that were removed from img
     for img in win.imgs:
-        if img not in os.listdir(RAW_IMG_FOLDER):
-            os.remove(os.path.join(FIXED_IMG_FOLDER, img))
+        if img not in os.listdir(constant.RAW_IMG_FOLDER):
+            os.remove(os.path.join(constant.FIXED_IMG_FOLDER, img))
             win.imgs.remove(img)
     win.run()
     sys.exit(app.exec_())

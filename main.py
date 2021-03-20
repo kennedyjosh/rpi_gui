@@ -1,10 +1,10 @@
-from datetime import datetime
-from PyQt5.QtCore import Qt, QRect, QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 import CONFIG as config
 import constant
 import img_dr
+from MainLayout import MainLayout
 import os
 import random
 import shutil
@@ -23,18 +23,10 @@ class MainWindow(QMainWindow):
         self.timer.setInterval(config.PhotoChangeInterval * constant.MILLISEC)
         self.timer.timeout.connect(self.change_img)
 
-        self.clock_refresh = QTimer()
-        self.clock_refresh.setInterval(constant.MILLISEC)
-        self.clock_refresh.timeout.connect(self.update_clock)
-
         self.lbl_img = QLabel(self)
         self.lbl_img.move(0,0)
 
-        self.lbl_clock = QLabel(self)
-        # w >> 1 == w / 2 (or close enough)
-        self.lbl_clock.setStyleSheet(constant.SS_FONT + constant.SS_BBOX)
-        self.lbl_clock.setAlignment(Qt.AlignHCenter)
-
+        self.setCentralWidget(MainLayout(self.app))
 
     def run(self):
         screenRes = self.app.primaryScreen().size()
@@ -45,10 +37,9 @@ class MainWindow(QMainWindow):
         self.lbl_img.resize(screenRes.width(), screenRes.height())
         self.change_img()
 
-        self.update_clock()
-
         self.timer.start()
-        self.clock_refresh.start()
+
+        self.centralWidget().run()
 
         self.showFullScreen()
 
@@ -61,25 +52,6 @@ class MainWindow(QMainWindow):
         self.lbl_img.setPixmap(QPixmap(img_path))
         self.lbl_img.show()
         self.timer.start()
-
-    def update_clock(self):
-        time = datetime.now().time()
-        curr_time_txt = time.strftime("%d:%%M%%p" % (time.hour % 12 if time.hour % 12 else 12)).lower()
-        self.lbl_clock.setText(curr_time_txt)
-        self.lbl_clock.adjustSize()
-        # ensure label is centered
-        self.lbl_clock.move((screenRes.width() >> 1) - # the subtracted amt is 1/2 * expected text width
-                                (self.lbl_clock.fontMetrics().boundingRect(self.lbl_clock.text()).width() >> 1),
-                            int(screenRes.height() * .85))
-        # the background looked too tight horizontally,
-        # this cmd increases the horizontal size by 3% and re-centers
-        self.lbl_clock.setGeometry(QRect(
-            int(self.lbl_clock.x() - (self.lbl_clock.size().width() * .04)),
-            self.lbl_clock.y(),
-            int(self.lbl_clock.size().width() * 1.04),
-            self.lbl_clock.size().height()
-        ))
-        self.clock_refresh.start()
 
     def keyPressEvent(self, event) -> None:
         if event.key() == Qt.Key_Escape:

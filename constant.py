@@ -13,3 +13,6 @@ SS_BBOX = ("border-top-left-radius : 20px; border-top-right-radius : 20px; borde
 '''Subfolders to hold background images'''
 RAW_IMG_FOLDER = os.path.join(os.getcwd(), "img")
 FIXED_IMG_FOLDER = os.path.join(os.getcwd(), ".img")
+
+'''Folder for icon images'''
+ICON_FOLDER = os.path.join(os.getcwd(), ".icon")

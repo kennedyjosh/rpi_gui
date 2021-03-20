@@ -1,8 +1,10 @@
 from datetime import datetime
-from PaddedLabel import PaddedLabel
+from StylizedClasses import Icon, PaddedLabel
 from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtWidgets import QGridLayout, QSizePolicy, QWidget
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget
 import constant
+import os
 
 class MainLayout(QWidget):
     def __init__(self, app):
@@ -21,6 +23,23 @@ class MainLayout(QWidget):
         # Fixed means it only uses sizeHint function to determine size
         self.lbl_clock.setSizePolicy(QSizePolicy())
 
+        self.frame_outdoor_weather = QFrame()
+        self.frame_outdoor_weather.setStyleSheet(constant.SS_BBOX)
+        self.frame_outdoor_weather.setAttribute(Qt.WA_StyledBackground, True)
+        self.layout_outdoor_weather = QHBoxLayout(self.frame_outdoor_weather)
+        self.layout_outdoor_weather.setStretch(0, 1)
+        self.layout_outdoor_weather.setStretch(1, 5)
+        self.lbl_outdoor_weather_temp = QLabel()
+        self.lbl_outdoor_weather_temp.setText("80°")
+        self.lbl_outdoor_weather_temp.setStyleSheet(constant.SS_FONT + "background-color : rgba(0,0,0,0);")
+        self.lbl_outdoor_weather_temp.adjustSize()
+        temp_text_height = self.lbl_outdoor_weather_temp.fontMetrics().boundingRect(self.lbl_outdoor_weather_temp.text()).size().height()
+        temp_text_width = self.lbl_outdoor_weather_temp.fontMetrics().boundingRect(self.lbl_outdoor_weather_temp.text()).size().width()
+        self.lbl_outdoor_weather_icon = Icon(int(0.8 * temp_text_height), os.path.join(constant.ICON_FOLDER, "sun.png"))
+        self.layout_outdoor_weather.addWidget(self.lbl_outdoor_weather_icon)
+        self.layout_outdoor_weather.addWidget(self.lbl_outdoor_weather_temp)
+        self.frame_outdoor_weather.setFixedSize(QSize(int(temp_text_width * 2.05), int(temp_text_height * 1.05)))
+
     def run(self):
         # set spacing ratios for rows
         # row 0:1:2 being 16:3:1 certifies 5% cushion at the bottom, 80% cushion on top
@@ -30,12 +49,20 @@ class MainLayout(QWidget):
         self.grid.setRowStretch(2, 1)
 
         # set spacing ratios for columns
-        # spacing ratio is 1:1 for each of 3 columns
-        for col in range(3):
-            self.grid.setColumnStretch(col, 1)
+        # spacing ratio is 1:1 for interior columns with padding on first and last col
+        for col in range(1,4):
+            self.grid.setColumnStretch(col, 6)
+        self.grid.setColumnStretch(0, 1)
+        self.grid.setColumnStretch(4, 1)
 
         # add children to grid layout
-        self.grid.addWidget(self.lbl_clock, 1, 1, alignment=Qt.AlignHCenter)
+        self.grid.addWidget(self.frame_outdoor_weather, 1, 1, alignment=Qt.AlignLeft)
+        self.grid.addWidget(self.lbl_clock, 1, 2, alignment=Qt.AlignHCenter)
+
+        # update height of icons
+        # self.lbl_outdoor_weather_icon.updateDim(
+        #     self.lbl_outdoor_weather_temp.fontMetrics().boundingRect(self.lbl_outdoor_weather_temp.text()).size().height()
+        # )
 
         # initialize update timers and run the update function to start things off
         self.clock_refresh.start()

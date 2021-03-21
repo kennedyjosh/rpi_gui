@@ -9,15 +9,16 @@ class Icon(QLabel):
     always remains a square of the given dimension'''
     def __init__(self, dim, img_path):
         super(Icon, self).__init__()
-        self.dim = dim
         # source: https://stackoverflow.com/a/37956012/11106258
         # enables transparency in pngs to work
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        # constructor with None, None can be used as temporary placeholder
+        self.dim = dim
         self.img_path = img_path
         self.updateImg()
 
-    def updateImg(self):
-        icon = QPixmap(self.img_path)
+    def updateImg(self, img=None):
+        icon = QPixmap(self.img_path if not img else img)
         self.setPixmap(icon.scaled(self.sizeHint(),
                                    Qt.KeepAspectRatio,
                                    Qt.SmoothTransformation))

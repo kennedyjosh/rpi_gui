@@ -1,9 +1,6 @@
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QLabel, QSizePolicy
-import constant
-import os
+from PyQt5.QtWidgets import QLabel
 
 class Icon(QSvgWidget):
     '''QLabel object which takes a dimension in its constructor and

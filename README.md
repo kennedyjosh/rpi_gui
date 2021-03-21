@@ -37,7 +37,11 @@ To stop the program, you will have to find and terminate the processes manually.
 
 Make sure PyQt5 is installed first. This could be tricky; `pip install pyqt5` did not work for me. Also install Pillow: `pip install pillow`.
 
-Clone the repository, `cd rpi_gui`, and do `python main.py`.
+Clone the repository, `cd rpi_gui`, and install the dependencies using the following command:
+
+`git clone https://github.com/ClimaCell-API/weather-code-icons.git weather_icons/`
+ 
+Then do `python main.py` to start the program.
 
 To end the program, do Ctrl+C or terminate the ssh session. You can also press the Escape button if you have a keyboard connected to your Pi.
 

@@ -1,27 +1,24 @@
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QBoxLayout, QLabel
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import QLabel, QSizePolicy
 import constant
 import os
 
-class Icon(QLabel):
+class Icon(QSvgWidget):
     '''QLabel object which takes a dimension in its constructor and
     always remains a square of the given dimension'''
     def __init__(self, dim, img_path):
         super(Icon, self).__init__()
-        # source: https://stackoverflow.com/a/37956012/11106258
-        # enables transparency in pngs to work
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        # constructor with None, None can be used as temporary placeholder
+        self.setStyleSheet("background-color : rgba(0,0,0,0);")
         self.dim = dim
         self.img_path = img_path
         self.updateImg()
 
     def updateImg(self, img=None):
-        icon = QPixmap(self.img_path if not img else img)
-        self.setPixmap(icon.scaled(self.sizeHint(),
-                                   Qt.KeepAspectRatio,
-                                   Qt.SmoothTransformation))
+        self.load(self.img_path if not img else img)
+        self.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
+        self.show()
 
     def updateDim(self, dim):
         self.dim = dim

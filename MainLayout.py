@@ -41,10 +41,14 @@ class MainLayout(QWidget):
         self.dict_outdoor_weather_icons = {}
         self.qstack_outdoor_weather_icons = QStackedWidget()
         self.qstack_outdoor_weather_icons.setAttribute(Qt.WA_TranslucentBackground, True)
-        icon_height = int(0.2 * self.app.primaryScreen().size().height())  #int(0.8 * temp_text_height)
-        # TODO init all weather icons from climacell
-        self.dict_outdoor_weather_icons['sun'] = Icon(icon_height, os.path.join(constant.ICON_FOLDER, "sun.png"))
-        self.qstack_outdoor_weather_icons.addWidget(self.dict_outdoor_weather_icons['sun'])
+        icon_height = int(0.2 * self.app.primaryScreen().size().height())  # a too-big guess of what icon height will be
+        # init all weather icons from climacell
+        for icon in os.listdir(constant.WEATHER_ICON_FOLDER):
+            if icon.endswith(".svg"):
+                icon_name = icon.split(".")[0]
+                self.dict_outdoor_weather_icons[icon_name] = Icon(icon_height,
+                                                                  os.path.join(constant.WEATHER_ICON_FOLDER, icon))
+                self.qstack_outdoor_weather_icons.addWidget(self.dict_outdoor_weather_icons[icon_name])
         # add labels to HBox
         self.hbox_outdoor_weather.addWidget(self.qstack_outdoor_weather_icons)
         self.hbox_outdoor_weather.addWidget(self.lbl_outdoor_weather_temp)
@@ -91,8 +95,9 @@ class MainLayout(QWidget):
         temp_text_width = temp_text_rect.size().width()
 
         # update icon
-        self.dict_outdoor_weather_icons['sun'].updateDim(int(0.8 * temp_text_height))
-        self.qstack_outdoor_weather_icons.setCurrentWidget(self.dict_outdoor_weather_icons['sun'])
+        icon = 'clear_day'  # TODO use weather api
+        self.dict_outdoor_weather_icons[icon].updateDim(int(0.8 * temp_text_height))
+        self.qstack_outdoor_weather_icons.setCurrentWidget(self.dict_outdoor_weather_icons[icon])
 
         # adjust size of frame to fit information + 5% padding
         self.frame_outdoor_weather.setFixedSize(QSize(int(temp_text_width * 2.05), int(temp_text_height * 1.05)))

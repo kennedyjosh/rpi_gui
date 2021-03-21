@@ -14,5 +14,5 @@ SS_BBOX = ("border-top-left-radius : 20px; border-top-right-radius : 20px; borde
 RAW_IMG_FOLDER = os.path.join(os.getcwd(), "img")
 FIXED_IMG_FOLDER = os.path.join(os.getcwd(), ".img")
 
-'''Folder for icon images'''
-ICON_FOLDER = os.path.join(os.getcwd(), ".icon")
+'''Folder for weather icons'''
+WEATHER_ICON_FOLDER = os.path.join(os.getcwd(), "weather_icons", "color")

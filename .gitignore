@@ -5,3 +5,4 @@ venv/
 *.idea
 .img
 __pycache__/
+weather_icons/

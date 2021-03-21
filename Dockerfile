@@ -15,6 +15,8 @@ ADD --chown=qtuser . /app
 
 WORKDIR /app
 
+RUN git clone https://github.com/ClimaCell-API/weather-code-icons.git weather_icons/
+
 # show OS and OS version
 RUN cat /etc/issue && cat /etc/debian_version
 

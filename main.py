@@ -1,10 +1,10 @@
+from MainLayout import MainLayout
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 import CONFIG as config
 import constant
 import img_dr
-from MainLayout import MainLayout
 import os
 import random
 import shutil

@@ -6,3 +6,4 @@ venv/
 .img
 __pycache__/
 weather_icons/
+secret.py.hidden

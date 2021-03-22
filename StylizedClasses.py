@@ -1,13 +1,14 @@
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QLabel
+import constant
 
 class Icon(QSvgWidget):
     '''QLabel object which takes a dimension in its constructor and
     always remains a square of the given dimension'''
     def __init__(self, dim, img_path):
         super(Icon, self).__init__()
-        self.setStyleSheet("background-color : rgba(0,0,0,0);")
+        self.setStyleSheet(constant.SS_NO_BACKGROUND)
         self.dim = dim
         self.img_path = img_path
         self.updateImg()
@@ -35,4 +36,4 @@ class PaddedLabel(QLabel):
         # adjust to fit around boundingRect of font with added 5% padding
         w = self.fontMetrics().boundingRect(self.text()).width()
         h = self.fontMetrics().boundingRect(self.text()).height()
-        return QSize(int(w * 1.05), int(h * 1.05))
+        return QSize(round(w * 1.1), round(h * 1.05))

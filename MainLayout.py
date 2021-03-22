@@ -15,6 +15,10 @@ class MainLayout(QWidget):
 
         self.grid = QGridLayout(self)
 
+        self.enabled_displays = {
+            "outdoor_weather": config.OutdoorWeatherEnabled
+        }
+
         self.init_clock()
         self.init_outdoor_weather()
 
@@ -25,7 +29,7 @@ class MainLayout(QWidget):
             "location": f"{config.Coords[0]},{config.Coords[1]}",
             "fields": "temperature,weatherCode",
             "timesteps": "current",
-            "apikey": config.ApiKey
+            "apikey": config.WeatherApiKey
         }
         try:
             result = requests.get(base_url, params=params, timeout=30)
@@ -43,31 +47,31 @@ class MainLayout(QWidget):
 
     def is_sun_up(self):
         '''Get sun data from local home assistant instance'''
-        url = config.HomeAssistantUrl + "/api/states/sun.sun"
-        headers = {
-            "Authorization": f"Bearer {config.HomeAssistantApi}",
-            "Content-Type": "application/json"
-        }
-        try:
-            result = requests.get(url, headers=headers, timeout=15)
-            if result.status_code == 200:
-                result = result.json()
-                if result['state'] == 'below_horizon':
-                    return False
-                else:
-                    return True
-            else:
-                raise ValueError
-        except:
-            print("Using time of day instead of sun state")
-            # if contacting home assistant fails, use rule:
-            # if it is after 6am and before 6pm, the sun is up
-            time = datetime.time(datetime.now())
-            secs = time.hour * 3600 + time.minute * 60 + time.second
-            if secs > (6 * 60 * 60) and secs < (18 * 60 * 60):
-                return True
-            else:
-                return False
+        if config.HomeAssistantUrl and config.HomeAssistantApi:
+            url = config.HomeAssistantUrl + "/api/states/sun.sun"
+            headers = {
+                "Authorization": f"Bearer {config.HomeAssistantApi}",
+                "Content-Type": "application/json"
+            }
+            try:
+                result = requests.get(url, headers=headers, timeout=15)
+                if result.status_code == 200:
+                    result = result.json()
+                    if result['state'] == 'below_horizon':
+                        return False
+                    else:
+                        return True
+            except:
+                pass
+        # if contacting home assistant fails, use rule:
+        # if it is after 6am and before 6pm, the sun is up
+        print("Using time of day instead of sun state")
+        time = datetime.time(datetime.now())
+        secs = time.hour * 3600 + time.minute * 60 + time.second
+        if secs > (6 * 60 * 60) and secs < (18 * 60 * 60):
+            return True
+        else:
+            return False
 
     def init_clock(self):
         '''Initialize clock label and update timer'''
@@ -82,6 +86,10 @@ class MainLayout(QWidget):
 
     def init_outdoor_weather(self):
         '''Initialize outdoor weather display'''
+        # if the ClimaCell API Key is missing, disable this pane
+        if not config.WeatherApiKey or not config.OutdoorWeatherEnabled:
+            self.enabled_displays['outdoor_weather'] = False
+            return
         # initialize update timer
         self.outdoor_weather_refresh = QTimer()
         self.outdoor_weather_refresh.setInterval(constant.MILLISEC * 60 * 3)   # 3 minutes
@@ -129,14 +137,16 @@ class MainLayout(QWidget):
         self.grid.setColumnStretch(4, 1)
 
         # add each display to grid layout
-        self.grid.addWidget(self.frame_outdoor_weather, 1, 1, alignment=Qt.AlignLeft)
+        if self.enabled_displays['outdoor_weather']:
+            self.grid.addWidget(self.frame_outdoor_weather, 1, 1, alignment=Qt.AlignLeft)
         self.grid.addWidget(self.lbl_clock, 1, 2, alignment=Qt.AlignHCenter)
 
         # start timers for info refresh and run the update functions for each display
         self.clock_refresh.start()
-        self.outdoor_weather_refresh.start()
         self.update_clock()
-        self.update_outdoor_weather()
+        if self.enabled_displays['outdoor_weather']:
+            self.outdoor_weather_refresh.start()
+            self.update_outdoor_weather()
 
     def update_clock(self):
         time = datetime.now().time()

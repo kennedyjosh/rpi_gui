@@ -14,6 +14,7 @@ For certain information displays, you will need:
 
 * A ClimaCell API Key (for outdoor weather info)
   * You can get one here: https://www.climacell.co/weather-api/
+  * If no API key is given, outdoor weather information will not show
 
 Entirely optional, but useful if you have it:
 

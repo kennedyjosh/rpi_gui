@@ -9,10 +9,11 @@ Font = "pibotolt"
 ClockFontSize = 84
 
 '''Weather API info'''
+OutdoorWeatherEnabled = True
 # (lattitude, longitude) coordinates of location
 Coords = secret.Coords
 # ClimaCell API key as a string
-ApiKey = secret.ClimaCellApiKey
+WeatherApiKey = secret.ClimaCellApiKey
 
 '''Home Assistant url'''
 # use http instead of https

@@ -10,7 +10,7 @@ ClockFontSize = 84
 
 '''Weather API info'''
 # (lattitude, longitude) coordinates of location
-Coords = (42.387666, -71.117220)
+Coords = secret.Coords
 # ClimaCell API key as a string
 ApiKey = secret.ClimaCellApiKey
 

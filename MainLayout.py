@@ -183,7 +183,15 @@ class MainLayout(QWidget):
                 icon = weather['weather'] +  "_night"
         else:
             # day/night version of icon does not exist
-            icon = weather['weather']
+            if weather['weather'] not in os.listdir(constant.WEATHER_ICON_FOLDER):
+                # sometimes, the first word (heavy or light, usually) is at the end of the
+                # file name. this corrects for that case. why did ClimaCell do this? ¯\_(ツ)_/¯
+                tmp_weather = weather['weather'].split("_")
+                tmp_weather = [tmp_weather[0]] + [s + '_' for i,s in enumerate(tmp_weather) if i > 0]
+                tmp_weather = ''.join(tmp_weather[1:]) + tmp_weather[0]
+                icon = tmp_weather
+            else:
+                icon = weather['weather']
         self.dict_outdoor_weather_icons[icon].updateDim(int(0.8 * temp_text_height))
         self.qstack_outdoor_weather_icons.setCurrentWidget(self.dict_outdoor_weather_icons[icon])
 

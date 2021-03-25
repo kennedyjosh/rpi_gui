@@ -1,5 +1,6 @@
 from datetime import datetime
 from PyQt5.QtCore import Qt, QSize, QTimer
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QLabel, QSizePolicy, QStackedWidget, QWidget
 from StylizedClasses import Icon, PaddedLabel
 import CONFIG as config
@@ -16,11 +17,30 @@ class MainLayout(QWidget):
         self.grid = QGridLayout(self)
 
         self.enabled_displays = {
-            "outdoor_weather": config.OutdoorWeatherEnabled
+            "outdoor_weather": config.OutdoorWeatherEnabled,
+            "indoor_weather": config.IndoorWeatherEnabled
         }
 
         self.init_clock()
+        self.init_indoor_weather()
         self.init_outdoor_weather()
+
+    def get_indoor_weather(self):
+        '''Get indoor weather from home assistant'''
+        if constant.HASS_URL and constant.HASS_TOKEN:
+            url = constant.HASS_URL + "/api/states/sensor.lumi_lumi_weather_temperature"
+            headers = {
+                "Authorization": f"Bearer {constant.HASS_TOKEN}",
+                "Content-Type": "application/json"
+            }
+            try:
+                result = requests.get(url, headers=headers, timeout=15)
+                if result.status_code == 200:
+                    result = result.json()
+                    return result['state']
+            except:
+                pass
+        return None
 
     def get_outdoor_weather(self):
         '''Use ClimaCell API to get weather information
@@ -86,6 +106,31 @@ class MainLayout(QWidget):
         # Fixed means it only uses sizeHint function to determine size
         self.lbl_clock.setSizePolicy(QSizePolicy())
 
+    def init_indoor_weather(self):
+        '''Initialize indoor weather display'''
+        if not constant.HASS_URL or not constant.HASS_TOKEN or not config.IndoorWeatherEnabled:
+            self.enabled_displays['indoor_weather'] = False
+            return
+        # initialize update timer
+        self.indoor_weather_refresh = QTimer()
+        self.indoor_weather_refresh.setInterval(constant.MILLISEC * 60)   # 1 minute
+        self.indoor_weather_refresh.timeout.connect(self.update_indoor_weather)
+        # QFrame holds the main layout for the weather display
+        self.frame_indoor_weather = QFrame()
+        self.frame_indoor_weather.setStyleSheet(constant.SS_BBOX)
+        # HBox has weather icon in col 1, temperature in col 2
+        self.hbox_indoor_weather = QHBoxLayout(self.frame_indoor_weather)
+        # temperature label
+        self.lbl_indoor_weather_temp = QLabel()
+        self.lbl_indoor_weather_temp.setStyleSheet(constant.SS_FONT + constant.SS_NO_BACKGROUND)
+        # indoor weather icon
+        self.lbl_indoor_weather_icon = QLabel()
+        self.lbl_indoor_weather_icon.setPixmap(QPixmap(constant.INDOOR_ICON))
+        self.lbl_indoor_weather_icon.setStyleSheet(constant.SS_NO_BACKGROUND)
+        # add labels to HBox
+        self.hbox_indoor_weather.addWidget(self.lbl_indoor_weather_temp)
+        self.hbox_indoor_weather.addWidget(self.lbl_indoor_weather_icon)
+
     def init_outdoor_weather(self):
         '''Initialize outdoor weather display'''
         # if the ClimaCell API Key is missing, disable this pane
@@ -140,10 +185,15 @@ class MainLayout(QWidget):
         if self.enabled_displays['outdoor_weather']:
             self.grid.addWidget(self.frame_outdoor_weather, 1, 1, alignment=Qt.AlignLeft)
         self.grid.addWidget(self.lbl_clock, 1, 2, alignment=Qt.AlignHCenter)
+        if self.enabled_displays['indoor_weather']:
+            self.grid.addWidget(self.frame_indoor_weather, 1, 3, alignment=Qt.AlignRight)
 
         # start timers for info refresh and run the update functions for each display
         self.clock_refresh.start()
         self.update_clock()
+        if self.enabled_displays['indoor_weather']:
+            self.indoor_weather_refresh.start()
+            self.update_indoor_weather()
         if self.enabled_displays['outdoor_weather']:
             self.outdoor_weather_refresh.start()
             self.update_outdoor_weather()
@@ -153,6 +203,29 @@ class MainLayout(QWidget):
         curr_time_txt = time.strftime("%d:%%M%%p" % (time.hour % 12 if time.hour % 12 else 12)).lower()
         self.lbl_clock.setText(curr_time_txt)
         self.lbl_clock.adjustSize()
+
+    def update_indoor_weather(self):
+        temp = self.get_indoor_weather()
+        # if fail to get whether data, make text red
+        if temp == None:
+            self.lbl_indoor_weather_temp.setStyleSheet(constant.SS_RED_FONT + constant.SS_NO_BACKGROUND)
+            return
+        else:
+            self.lbl_indoor_weather_temp.setStyleSheet(constant.SS_FONT + constant.SS_NO_BACKGROUND)
+        self.lbl_indoor_weather_temp.setText(f"{round(float(temp.split(' ')[0]))}°")
+        # need these to update icon and frame size
+        temp_text_rect = self.lbl_indoor_weather_temp.fontMetrics().boundingRect(self.lbl_indoor_weather_temp.text())
+        temp_text_height = temp_text_rect.size().height()
+        temp_text_width = temp_text_rect.size().width()
+
+        # update size of icon
+        icon = QPixmap(constant.INDOOR_ICON).scaled(round(0.9 * temp_text_height),
+                                                    round(0.9 * temp_text_height),
+                                                    Qt.KeepAspectRatio)
+        self.lbl_indoor_weather_icon.setPixmap(icon)
+
+        # adjust size of frame to fit information + 5% padding
+        self.frame_indoor_weather.setFixedSize(QSize(round(temp_text_width * 2.05), round(temp_text_height * 1.05)))
 
     def update_outdoor_weather(self):
         # get results from weather api

@@ -23,6 +23,7 @@ FIXED_IMG_FOLDER = os.path.join(os.getcwd(), ".img")
 
 '''Folder for weather icons'''
 WEATHER_ICON_FOLDER = os.path.join(os.getcwd(), "weather_icons", "color")
+INDOOR_ICON = os.path.join(os.getcwd(), ".icon", "home.png")
 
 '''Weather Codes (ClimaCell)'''
 WEATHER_CODES = {

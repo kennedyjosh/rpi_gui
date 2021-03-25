@@ -8,5 +8,6 @@ PhotoChangeInterval = 30
 Font = "pibotolt"
 ClockFontSize = 84
 
-'''Weather API info'''
+'''Weather'''
 OutdoorWeatherEnabled = True
+IndoorWeatherEnabled = True

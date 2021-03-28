@@ -98,7 +98,8 @@ class MainLayout(QWidget):
     def init_clock(self):
         '''Initialize clock label and update timer'''
         self.clock_refresh = QTimer()
-        self.clock_refresh.setInterval(constant.MILLISEC)
+        time = datetime.now().time()
+        self.clock_refresh.setInterval(constant.MILLISEC * (60 - time.second))
         self.clock_refresh.timeout.connect(self.update_clock)
         self.lbl_clock = PaddedLabel(self)
         self.lbl_clock.setStyleSheet(constant.SS_FONT + constant.SS_BBOX)
@@ -200,6 +201,7 @@ class MainLayout(QWidget):
 
     def update_clock(self):
         time = datetime.now().time()
+        self.clock_refresh.setInterval(constant.MILLISEC * (60 - time.second))
         curr_time_txt = time.strftime("%d:%%M%%p" % (time.hour % 12 if time.hour % 12 else 12)).lower()
         self.lbl_clock.setText(curr_time_txt)
         self.lbl_clock.adjustSize()

@@ -7,6 +7,7 @@ import CONFIG as config
 import constant
 import os
 import requests
+import sys
 
 class MainLayout(QWidget):
     def __init__(self, app):
@@ -59,6 +60,8 @@ class MainLayout(QWidget):
             return None
         if result.status_code == 200:
             result = result.json()['data']['timelines'][0]['intervals'][0]['values']
+            if 'temperature' not in result.keys():
+                print(f"200 OK: {result}", file=sys.stderr)
             return {
                 "temp": (result['temperature'] * 1.8) + 32,
                 "weather": constant.WEATHER_CODES[str(result['weatherCode'])]
@@ -267,6 +270,9 @@ class MainLayout(QWidget):
                 icon = tmp_weather
             else:
                 icon = weather['weather']
+        # icon file for thunderstorms is called tstorm
+        if weather['weather'] == "thunderstorm":
+            icon = "tstorm"
         self.dict_outdoor_weather_icons[icon].updateDim(int(0.8 * temp_text_height))
         self.qstack_outdoor_weather_icons.setCurrentWidget(self.dict_outdoor_weather_icons[icon])
 

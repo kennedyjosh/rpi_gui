@@ -7,7 +7,7 @@ import CONFIG as config
 import constant
 import os
 import requests
-import sys
+from sys import stderr
 
 class MainLayout(QWidget):
     def __init__(self, app):
@@ -61,11 +61,17 @@ class MainLayout(QWidget):
         if result.status_code == 200:
             result = result.json()['data']['timelines'][0]['intervals'][0]['values']
             if 'temperature' not in result.keys():
-                print(f"200 OK: {result}", file=sys.stderr)
-            return {
+                print(f"200 OK: {result}", file=stderr)
+            try:
+                return {
                 "temp": (result['temperature'] * 1.8) + 32,
                 "weather": constant.WEATHER_CODES[str(result['weatherCode'])]
-            }
+                }
+            except:
+                print(f"ERR: result = {result}")
+                import traceback
+                traceback.print_exc()
+                return None
         else:
             print(result.json())
             return None
@@ -212,7 +218,7 @@ class MainLayout(QWidget):
     def update_indoor_weather(self):
         temp = self.get_indoor_weather()
         # if fail to get whether data, make text red
-        if temp == None:
+        if temp == None or temp == 'unavailable':
             self.lbl_indoor_weather_temp.setStyleSheet(constant.SS_RED_FONT + constant.SS_NO_BACKGROUND)
             return
         else:
